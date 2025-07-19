@@ -11,31 +11,44 @@ spec:
     metadata:
       labels:
         app: ollama
-    spec:
+    spec:                        # <== THIS LINE must be correctly indented under template
       containers:
-      - name: ollama
-        image: ollama-gemma:latest
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 11434
-        env:
-        - name: OLLAMA_NUM_PARALLEL
-          value: "4"
-        resources:
-          limits:
-            cpu: "2"
-            memory: "2Gi"
+        - name: ollama
+          image: ollama-gemma:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 11434
+              name: http-metrics
+          env:
+            - name: OLLAMA_NUM_PARALLEL
+              value: "4"
+          resources:
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+
+        - name: ollama-exporter
+          image: ollama-metrics-exporter:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9101
+              name: metrics
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ollama-service
+  labels:
+    app: ollama
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: ollama
   ports:
-    - port: 80
+    - name: http-metrics
+      port: 80
       targetPort: 11434
       nodePort: 30100
-
+    - name: metrics
+      port: 9101
+      targetPort: 9101

@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ollama-servicemonitor
+  labels:
+    release: prometheus  # 👈 must match your Prometheus instance's `release:` label
+spec:
+  selector:
+    matchLabels:
+      app: ollama
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+  namespaceSelector:
+    matchNames:
+      - default  # 👈 namespace where your `ollama-service` is deployed
