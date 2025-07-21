@@ -1,0 +1,39 @@
+name: Verify Ollama Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🐳 Build Ollama container
+        run: docker build -t ollama-gemma -f Dockerfile .
+
+      - name: 🐍 Build metrics exporter
+        run: docker build -t ollama-metrics-exporter -f Dockerfile.exporter .
+
+      - name: 🚀 Start Ollama container
+        run: |
+          docker run -d -p 11434:11434 --name ollama ollama-gemma
+          sleep 10
+
+      - name: 📊 Start metrics exporter
+        run: |
+          docker run -d -p 9101:9101 --name metrics ollama-metrics-exporter
+          sleep 5
+
+      - name: 🧪 Check Ollama status
+        run: curl --fail http://localhost:11434 || (echo "❌ Ollama not responding" && exit 1)
+
+      - name: 📈 Check Metrics Exporter
+        run: curl --fail http://localhost:9101/metrics || (echo "❌ Metrics not responding" && exit 1)
+
+      - name: 🧪 Run Locust Test (headless)
+        run: |
+          pip install locust
+          locust -f locustfile.py --headless -u 2 -r 1 --run-time 10s --host http://localhost:11434
