@@ -6,6 +6,6 @@ class OllamaUser(HttpUser):
         self.client.post("/api/chat", json={
             "model": "gemma:2b",
             "messages": [
-                { "role": "user", "content": "Summarize AI in 3 lines." }
+                { "role": "user", "content": "Hello" }
             ]
         })
