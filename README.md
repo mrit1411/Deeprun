@@ -60,7 +60,7 @@
 * AMI: Use Amazon Linux 2 EKS-optimized GPU AMI
 * Region: `us-east-1` (cheaper GPU zones)
 
-> 💰 **Estimated Cost**:
+>  **Estimated Cost**:
 > `g4dn.xlarge` ≈ \$0.526/hour
 > `EBS 100GB` ≈ \$10/month
 > Total ≈ \$400–500/month for 3 nodes
@@ -106,7 +106,7 @@ spec:
             - containerPort: 11434
 ```
 
-> 🧠 `OLLAMA_NUM_PARALLEL=4` allows 4 concurrent inferences per pod.
+>  `OLLAMA_NUM_PARALLEL=4` allows 4 concurrent inferences per pod.
 
 ---
 
@@ -177,7 +177,7 @@ spec:
 * Create a `ServiceMonitor`
 * Add dashboards in Grafana
 
-> 💰 **Prometheus & Grafana Cost:** Free on self-hosted; \$49/month on Grafana Cloud Pro
+>  **Prometheus & Grafana Cost:** Free on self-hosted; \$49/month on Grafana Cloud Pro
 
 ---
 
@@ -230,17 +230,6 @@ locust -f locustfile.py --headless -u 50 -r 10 --host=http://<OLLAMA_URL>
 | Data Transfer         | 100GB | \~\$0.09/GB         | \~\$9        |
 | EKS + Control Plane   | 1     | Free on self-hosted | \$0          |
 
-> 💡**Total**: \~\$1,191/month (baseline)
+> **Total**: \~\$1,191/month (baseline)
 > Use **Minikube + ngrok** for free-tier local testing
 
----
-
-## ✅ 6. Interview-Ready Talking Points
-
-* **Scalability**: "I implemented autoscaling using HPA based on CPU usage, with horizontal scaling up to 10 replicas."
-* **Concurrency**: "I configured `OLLAMA_NUM_PARALLEL=4` per pod to enable multi-user queries simultaneously."
-* **Monitoring**: "I used Prometheus + Grafana with sidecar exporters to monitor request rate, latency, and GPU utilization."
-* **Security**: "Access is restricted via API Gateway and OAuth2 proxy, and all communication is encrypted with TLS."
-* **IaC**: "All infrastructure is provisioned using Terraform and Helm, enabling one-command deployments."
-
----
