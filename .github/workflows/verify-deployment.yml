@@ -3,7 +3,6 @@ name: Verify Ollama Deployment
 on:
   push:
     branches:
-      - main
       - update
   workflow_dispatch:
 
