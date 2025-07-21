@@ -8,18 +8,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout Repo
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: 🐳 Build Docker Image
+      - name: Build Docker Image
         run: |
           docker build -t ollama-gemma .
 
-      - name: 🚀 Run Ollama Container
+      - name: Run Ollama Container
         run: |
           docker run -d -p 11434:11434 --name ollama_instance ollama-gemma
           sleep 10
 
-      - name: ✅ Check if Ollama is Running
+      - name: Check if Ollama is Running
         run: |
           curl --fail http://localhost:11434 || (echo "❌ Ollama is not responding!" && exit 1)
