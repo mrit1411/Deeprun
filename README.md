@@ -3,7 +3,7 @@
 
 ## ✅ **Phase 1: Initial Objective**
 
-Aimed to set up a **scalable, monitorable Ollama-based LLM serving system** using Kubernetes, Prometheus, Grafana, and Terraform.
+Aimed to set up a **scalable, monitorable Ollama-based LLM serving system** using Docker, Kubernetes, Prometheus, Grafana.
 
 ---
 
