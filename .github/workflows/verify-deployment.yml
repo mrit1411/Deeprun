@@ -1,9 +1,6 @@
 name: Verify Ollama Deployment
 
 on:
-  push:
-    branches:
-      - update
   workflow_dispatch:
 
 jobs:
@@ -11,32 +8,83 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📦 Checkout code
-        uses: actions/checkout@v3
+    - name: 📦 Checkout code
+      uses: actions/checkout@v3
 
-      - name: 🐳 Build Ollama container
-        run: docker build -t ollama-gemma -f Dockerfile .
+    # -----------------------------
+    # Docker Build Phase
+    # -----------------------------
+    - name: 🐳 Build Ollama container
+      run: docker build -t ollama-gemma -f Dockerfile .
 
-      - name: 🐍 Build metrics exporter
-        run: docker build -t ollama-metrics-exporter -f Dockerfile.exporter .
+    - name: 🐳 Build Metrics Exporter
+      run: docker build -t ollama-metrics-exporter -f Dockerfile.exporter .
 
-      - name: 🚀 Start Ollama container
-        run: |
-          docker run -d -p 11434:11434 --name ollama ollama-gemma
-          sleep 10
+    # -----------------------------
+    # Run Containers
+    # -----------------------------
+    - name: 🚀 Start Ollama container
+      run: |
+        docker run -d -p 11434:11434 --name ollama ollama-gemma
+        echo "⏳ Waiting for Ollama to start..."
 
-      - name: 📊 Start metrics exporter
-        run: |
-          docker run -d -p 9101:9101 --name metrics ollama-metrics-exporter
-          sleep 5
+    - name: 🚀 Start Metrics Exporter
+      run: |
+        docker run -d -p 9101:9101 --name exporter ollama-metrics-exporter
 
-      - name: 🧪 Check Ollama status
-        run: curl --fail http://localhost:11434 || (echo "❌ Ollama not responding" && exit 1)
+    # -----------------------------
+    # Debug + Wait for Ollama
+    # -----------------------------
+    - name: ⏱️ Wait for Ollama to be ready
+      run: |
+        for i in {1..20}; do
+          if curl -s http://localhost:11434 > /dev/null; then
+            echo "✅ Ollama is up"
+            exit 0
+          fi
+          echo "⏳ Waiting for Ollama... ($i)"
+          sleep 3
+        done
+        echo "❌ Ollama did not respond in time"
+        docker logs ollama
+        exit 1
 
-      - name: 📈 Check Metrics Exporter
-        run: curl --fail http://localhost:9101/metrics || (echo "❌ Metrics not responding" && exit 1)
+    - name: 🧪 Check Metrics Exporter
+      run: |
+        for i in {1..10}; do
+          if curl -s http://localhost:9101/metrics > /dev/null; then
+            echo "✅ Metrics Exporter is running"
+            exit 0
+          fi
+          echo "⏳ Waiting for Metrics Exporter... ($i)"
+          sleep 2
+        done
+        echo "❌ Metrics Exporter not responding"
+        docker logs exporter
+        exit 1
 
-      - name: 🧪 Run Locust Test (headless)
-        run: |
-          pip install locust
-          locust -f locustfile.py --headless -u 2 -r 1 --run-time 10s --host http://localhost:11434
+    # -----------------------------
+    # Load Testing via Locust
+    # -----------------------------
+    - name: 🧪 Install Locust
+      run: pip install locust
+
+    - name: 🧪 Run Locust Test (headless)
+      run: |
+        locust -f locustfile.py --headless -u 2 -r 1 --run-time 10s --host http://localhost:11434
+
+    # -----------------------------
+    # Show container logs if needed
+    # -----------------------------
+    - name: 📋 Show Ollama Logs (for debugging)
+      if: failure()
+      run: docker logs ollama
+
+    - name: 📋 Show Exporter Logs (for debugging)
+      if: failure()
+      run: docker logs exporter
+
+    - name: 🧪 Run Locust Test (headless)
+      run: |
+         pip install locust
+         locust -f locustfile.py --headless -u 2 -r 1 --run-time 10s --host http://localhost:11434
