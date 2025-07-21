@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Bind Ollama to 0.0.0.0 so it's reachable from outside the pod
-ollama serve --host 0.0.0.0 &
+# ✅ Just start Ollama without --host
+ollama serve &
 
-# Pull the model
+# Pull the model after a short delay
 sleep 3
 ollama pull gemma:2b
 
