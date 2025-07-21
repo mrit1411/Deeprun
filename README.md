@@ -230,6 +230,6 @@ locust -f locustfile.py --headless -u 50 -r 10 --host=http://<OLLAMA_URL>
 | Data Transfer         | 100GB | \~\$0.09/GB         | \~\$9        |
 | EKS + Control Plane   | 1     | Free on self-hosted | \$0          |
 
-> **Total**: \~\$1,191/month (baseline)
-> Use **Minikube + ngrok** for free-tier local testing
+> **Total**: \~\$1,191/month 
+> Use **Minikube + ngrok** for testing
 
